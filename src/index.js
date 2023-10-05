@@ -17,15 +17,15 @@ let currentQuery = '';
 
 searchForm.addEventListener('submit', async e => {
   e.preventDefault();
-  currentPage = 1; // Resetuj stronę po każdym nowym wyszukiwaniu
+  currentPage = 1;
   currentQuery = e.target.searchQuery.value;
-  gallery.innerHTML = ''; // Wyczyść galerię
+  gallery.innerHTML = '';
 
   const images = await fetchImages(currentQuery, currentPage);
   displayImages(images);
 
   if (images.length > 0) {
-    loadMoreButton.style.display = 'block'; // Wyświetl przycisk "Load more"
+    loadMoreButton.style.display = 'block';
   } else {
     notiflix.Notify.failure(
       'Sorry, there are no images matching your search query. Please try again.'
@@ -88,9 +88,49 @@ function displayImages(images) {
   });
 
   if (images.length === 0) {
-    loadMoreButton.style.display = 'none'; // Ukryj przycisk "Load more" na końcu kolekcji
-    notiflix.Notify.failure(
+    loadMoreButton.style.display = 'none';
+    Notiflix.Notify.failure(
       "We're sorry, but you've reached the end of search results."
     );
+  }
+
+  let currentPage = 1;
+  let maxPages = 1;
+
+  async function loadImages(query, page) {
+    try {
+      const response = await axios.get(
+        `https://pixabay.com/api/?page=${page}&per_page=40&q=${query}`
+      );
+      const data = response.data;
+      maxPages = Math.ceil(data.totalHits / 40);
+
+      if (currentPage >= maxPages) {
+        document.getElementById('load-more').style.display = 'none';
+        Notiflix.Notify.Info(
+          "We're sorry, but you've reached the end of search results."
+        );
+      } else {
+        document.getElementById('load-more').style.display = 'block';
+      }
+    } catch (error) {
+      console.error('Błąd podczas ładowania obrazków:', error);
+    }
+  }
+
+  document.getElementById('load-more').addEventListener('click', () => {
+    currentPage++;
+    loadImages('WYSZUKANE_SLOWO', currentPage);
+  });
+
+  loadImages('WYSZUKANE_SLOWO', currentPage);
+  const data = response.data;
+  maxPages = Math.ceil(data.totalHits / 40);
+
+  if (data.hits.length === 0) {
+    Notiflix.Notify.Failure(
+      'Sorry, there are no images matching your search query. Please try again.'
+    );
+  } else {
   }
 }
