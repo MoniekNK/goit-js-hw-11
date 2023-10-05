@@ -1,19 +1,17 @@
 'use strict';
 
-import axios from 'axios';
-axios.defaults.headers.common['x-pixabay-key'] =
-  '754704-15f293fdc79a851fbfbf7bf56';
-
 import Notiflix from 'notiflix';
+import { fetchImages } from './api';
 
 const searchForm = document.getElementById('search-form');
 const gallery = document.querySelector('.gallery');
 const loadMoreButton = document.getElementById('load-more');
 
-const API_KEY = '754704-15f293fdc79a851fbfbf7bf56';
-const BASE_URL = 'https://pixabay.com/api/';
 let currentPage = 1;
 let currentQuery = '';
+
+const API_KEY = '754704-15f293fdc79a851fbfbf7bf56';
+const BASE_URL = 'https://pixabay.com/api/';
 
 searchForm.addEventListener('submit', async e => {
   e.preventDefault();
@@ -21,22 +19,29 @@ searchForm.addEventListener('submit', async e => {
   currentQuery = e.target.searchQuery.value;
   gallery.innerHTML = '';
 
-  const images = await fetchImages(currentQuery, currentPage);
-  displayImages(images);
+  try {
+    const images = await fetchImages(currentQuery, currentPage);
+    displayImages(images);
 
-  if (images.length > 0) {
-    loadMoreButton.style.display = 'block';
-  } else {
-    notiflix.Notify.failure(
-      'Sorry, there are no images matching your search query. Please try again.'
-    );
+    if (images.length > 0) {
+      loadMoreButton.style.display = 'block';
+    } else {
+      Notiflix.Notify.failure(
+        'Sorry, there are no images matching your search query. Please try again.'
+      );
+    }
+  } catch (error) {
+    console.error('Błąd podczas wyszukiwania obrazków:', error);
   }
 });
-
 loadMoreButton.addEventListener('click', async () => {
   currentPage++;
-  const images = await fetchImages(currentQuery, currentPage);
-  displayImages(images);
+  try {
+    const images = await fetchImages(currentQuery, currentPage);
+    displayImages(images);
+  } catch (error) {
+    console.error('Błąd podczas ładowania kolejnych obrazków:', error);
+  }
 });
 
 async function fetchImages(query, page) {
@@ -120,10 +125,10 @@ function displayImages(images) {
 
   document.getElementById('load-more').addEventListener('click', () => {
     currentPage++;
-    loadImages('WYSZUKANE_SLOWO', currentPage);
+    loadImages(currentQuery, currentPage);
   });
 
-  loadImages('WYSZUKANE_SLOWO', currentPage);
+  loadImages(currentQuery, currentPage);
   const data = response.data;
   maxPages = Math.ceil(data.totalHits / 40);
 
