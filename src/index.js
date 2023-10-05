@@ -1,17 +1,19 @@
 'use strict';
 
+import axios from 'axios';
+axios.defaults.headers.common['x-pixabay-key'] =
+  '754704-15f293fdc79a851fbfbf7bf56';
+
 import Notiflix from 'notiflix';
-import { fetchImages } from './api';
 
 const searchForm = document.getElementById('search-form');
 const gallery = document.querySelector('.gallery');
 const loadMoreButton = document.getElementById('load-more');
 
-let currentPage = 1;
-let currentQuery = '';
-
 const API_KEY = '754704-15f293fdc79a851fbfbf7bf56';
 const BASE_URL = 'https://pixabay.com/api/';
+let currentPage = 1;
+let currentQuery = '';
 
 searchForm.addEventListener('submit', async e => {
   e.preventDefault();
@@ -34,6 +36,7 @@ searchForm.addEventListener('submit', async e => {
     console.error('Błąd podczas wyszukiwania obrazków:', error);
   }
 });
+
 loadMoreButton.addEventListener('click', async () => {
   currentPage++;
   try {
@@ -45,52 +48,15 @@ loadMoreButton.addEventListener('click', async () => {
 });
 
 async function fetchImages(query, page) {
-  const response = await fetch(
+  const response = await axios.get(
     `${BASE_URL}?key=${API_KEY}&q=${query}&image_type=photo&orientation=horizontal&safesearch=true&page=${page}&per_page=40`
   );
-  const data = await response.json();
+  const data = response.data;
   return data.hits;
 }
 
 function displayImages(images) {
-  images.forEach(image => {
-    const photoCard = document.createElement('div');
-    photoCard.classList.add('photo-card');
-
-    const img = document.createElement('img');
-    img.src = image.webformatURL;
-    img.alt = image.tags;
-    img.loading = 'lazy';
-
-    const infoDiv = document.createElement('div');
-    infoDiv.classList.add('info');
-
-    const likes = document.createElement('p');
-    likes.classList.add('info-item');
-    likes.innerHTML = `<b>Likes:</b> ${image.likes}`;
-
-    const views = document.createElement('p');
-    views.classList.add('info-item');
-    views.innerHTML = `<b>Views:</b> ${image.views}`;
-
-    const comments = document.createElement('p');
-    comments.classList.add('info-item');
-    comments.innerHTML = `<b>Comments:</b> ${image.comments}`;
-
-    const downloads = document.createElement('p');
-    downloads.classList.add('info-item');
-    downloads.innerHTML = `<b>Downloads:</b> ${image.downloads}`;
-
-    infoDiv.appendChild(likes);
-    infoDiv.appendChild(views);
-    infoDiv.appendChild(comments);
-    infoDiv.appendChild(downloads);
-
-    photoCard.appendChild(img);
-    photoCard.appendChild(infoDiv);
-
-    gallery.appendChild(photoCard);
-  });
+  images.forEach(image => {});
 
   if (images.length === 0) {
     loadMoreButton.style.display = 'none';
@@ -99,43 +65,26 @@ function displayImages(images) {
     );
   }
 
-  let currentPage = 1;
-  let maxPages = 1;
-
-  async function loadImages(query, page) {
-    try {
-      const response = await axios.get(
-        `https://pixabay.com/api/?page=${page}&per_page=40&q=${query}`
-      );
-      const data = response.data;
-      maxPages = Math.ceil(data.totalHits / 40);
-
-      if (currentPage >= maxPages) {
-        document.getElementById('load-more').style.display = 'none';
-        Notiflix.Notify.Info(
-          "We're sorry, but you've reached the end of search results."
-        );
-      } else {
-        document.getElementById('load-more').style.display = 'block';
-      }
-    } catch (error) {
-      console.error('Błąd podczas ładowania obrazków:', error);
-    }
-  }
-
-  document.getElementById('load-more').addEventListener('click', () => {
-    currentPage++;
-    loadImages(currentQuery, currentPage);
-  });
-
   loadImages(currentQuery, currentPage);
-  const data = response.data;
-  maxPages = Math.ceil(data.totalHits / 40);
+}
 
-  if (data.hits.length === 0) {
-    Notiflix.Notify.Failure(
-      'Sorry, there are no images matching your search query. Please try again.'
+async function loadImages(query, page) {
+  try {
+    const response = await axios.get(
+      `https://pixabay.com/api/?page=${page}&per_page=40&q=${query}`
     );
-  } else {
+    const data = response.data;
+    const maxPages = Math.ceil(data.totalHits / 40);
+
+    if (currentPage >= maxPages) {
+      document.getElementById('load-more').style.display = 'none';
+      Notiflix.Notify.Info(
+        "We're sorry, but you've reached the end of search results."
+      );
+    } else {
+      document.getElementById('load-more').style.display = 'block';
+    }
+  } catch (error) {
+    console.error('Błąd podczas ładowania obrazków:', error);
   }
 }
