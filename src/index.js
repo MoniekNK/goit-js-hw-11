@@ -24,8 +24,8 @@ const onSearch = async e => {
       return;
     }
 
-    currentQuery = query; // Aktualizacja aktualnego zapytania
-    currentPage = 1; // Zresetowanie strony do 1
+    currentQuery = query;
+    currentPage = 1;
 
     const images = await fetchImages(currentQuery, currentPage);
     displayImages(images);
@@ -47,7 +47,7 @@ loadMoreButton.addEventListener('click', async () => {
 });
 
 async function fetchImages(query, page) {
-  const perPage = 40; // Liczba wyników na stronie
+  const perPage = 40;
   try {
     const response = await axios.get(
       `${BASE_URL}?key=${API_KEY}&q=${query}&image_type=photo&orientation=horizontal&safesearch=true&page=${page}&per_page=${perPage}`
@@ -62,7 +62,6 @@ async function fetchImages(query, page) {
 
 function displayImages(images) {
   if (currentPage === 1) {
-    // Jeśli to pierwsza strona, czyść galerię
     gallery.innerHTML = '';
   }
 
@@ -80,13 +79,13 @@ function displayImages(images) {
     });
 
     if (currentPage === 1) {
-      loadImages(currentQuery, currentPage); // Wywołaj tylko raz na pierwszej stronie
+      loadImages(currentQuery, currentPage);
     }
   }
 }
 
 async function loadImages(query, page) {
-  const perPage = 40; // Liczba wyników na stronie
+  const perPage = 40;
   try {
     const response = await axios.get(
       `${BASE_URL}?key=${API_KEY}&q=${query}&image_type=photo&orientation=horizontal&safesearch=true&page=${page}&per_page=${perPage}`
