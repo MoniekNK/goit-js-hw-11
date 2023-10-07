@@ -1,17 +1,19 @@
 'use strict';
-import Notiflix from 'notiflix';
+
 import axios from 'axios';
+axios.defaults.headers.common['x-pixabay-key'] =
+  '754704-15f293fdc79a851fbfbf7bf56';
 
-axios.defaults.baseURL = 'https://pixabay.com/api/';
-const apiKey = '754704-15f293fdc79a851fbfbf7bf56';
+import Notiflix from 'notiflix';
 
-const searchForm = document.querySelector('.search-form');
+const searchForm = document.getElementById('search-form');
 const gallery = document.querySelector('.gallery');
 const btnLoadMore = document.querySelector('.load-more');
 
-const perPage = 40;
-let page = 1;
-loadMoreButton.style.display = 'none';
+const API_KEY = '754704-15f293fdc79a851fbfbf7bf56';
+const BASE_URL = 'https://pixabay.com/api/';
+let currentPage = 1;
+let currentQuery = '';
 
 const onSearch = async e => {
   e.preventDefault();
@@ -30,48 +32,60 @@ const onSearch = async e => {
       Notiflix.Notify.warning(
         'Sorry, there are no images matching your search query. Please try again.'
       );
-    } else {
-      gallery(data.hits);
-
-      const totalHits = data.totalHits;
-      Notiflix.Notify.success(`Hooray! We found ${totalHits} images.`);
-
-      //
-      if (data.totalHits <= page * perPage) {
-        loadMoreButton.style.display = 'none';
-        Notiflix.Notify.warning(
-          "We're sorry, but you've reached the end of search results."
-        );
-      } else {
-        loadMoreButton.style.display = 'block';
-      }
     }
-  } catch (err) {
-    console.error('Error:', err);
+  } catch (error) {
+    console.error('Błąd podczas wyszukiwania obrazków:', error);
+  }
+});
+
+loadMoreButton.addEventListener('click', async () => {
+  currentPage++;
+  try {
+    const images = await fetchImages(currentQuery, currentPage);
+    displayImages(images);
+  } catch (error) {
+    console.error('Błąd podczas ładowania kolejnych obrazków:', error);
+  }
+});
+
+async function fetchImages(query, page) {
+  const response = await axios.get(
+    `${BASE_URL}?key=${API_KEY}&q=${query}&image_type=photo&orientation=horizontal&safesearch=true&page=${page}&per_page=40`
+  );
+  const data = response.data;
+  return data.hits;
+}
+
+function displayImages(images) {
+  images.forEach(image => {});
+
+  if (images.length === 0) {
+    loadMoreButton.style.display = 'none';
     Notiflix.Notify.failure(
-      'Oops! Something went wrong. Please try again later.'
+      "We're sorry, but you've reached the end of search results."
     );
   }
-};
 
-searchForm.addEventListener('submit', onSearch);
+  loadImages(currentQuery, currentPage);
+}
 
-const galleryElements = images => {
-  const galleryHTML = images
-    .map(image => {
-      return `
-        <div class="photo-card">
-          <a class="photo-card__link" href="${image.largeImageURL}">
-            <img class="photo-card__image" src="${image.webformatURL}" alt="${image.tags}" />
-          </a>
-          <div class="info">
-            <p class="info-item"><b>Likes:</b> ${image.likes}</p>
-            <p class="info-item"><b>Views:</b> ${image.views}</p>
-            <p class="info-item"><b>Comments:</b> ${image.comments}</p>
-            <p class="info-item"><b>Downloads:</b> ${image.downloads}</p>
-          </div>
-        </div>
-      `;
-    })
-    .join('');
-};
+async function loadImages(query, page) {
+  try {
+    const response = await axios.get(
+      `https://pixabay.com/api/?page=${page}&per_page=40&q=${query}`
+    );
+    const data = response.data;
+    const maxPages = Math.ceil(data.totalHits / 40);
+
+    if (currentPage >= maxPages) {
+      document.getElementById('load-more').style.display = 'none';
+      Notiflix.Notify.Info(
+        "We're sorry, but you've reached the end of search results."
+      );
+    } else {
+      document.getElementById('load-more').style.display = 'block';
+    }
+  } catch (error) {
+    console.error('Błąd podczas ładowania obrazków:', error);
+  }
+}
