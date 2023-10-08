@@ -8,13 +8,13 @@ export async function searchPhoto(query, page) {
   try {
     const response = await axios.get(BASE_URL, {
       params: {
-        key: apiKey,
+        key: API_KEY,
         q: query,
         image_type: 'photo',
         orientation: 'horizontal',
         safesearch: true,
         page: page,
-        perPage: 40,
+        per_page: 40,
       },
     });
     console.log(response.data);
