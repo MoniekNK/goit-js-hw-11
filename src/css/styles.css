@@ -80,3 +80,37 @@ button[type='submit']:hover {
 #load-more:hover {
   box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.3);
 }
+.photo-card {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  border: 2px solid #3498db;
+  border-radius: 8px;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+  transition: transform 0.3s ease;
+  background-color: #fff;
+}
+
+.photo-card:hover {
+  transform: scale(1.05);
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.photo-card a {
+  text-decoration: none;
+}
+
+.photo-card__image {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+.info {
+  padding: 10px;
+  background-color: #f7f7f7;
+}
+.info-item {
+  margin: 5px 0;
+}

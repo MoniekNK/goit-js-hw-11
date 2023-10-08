@@ -1,10 +1,7 @@
 'use strict';
 import Notiflix from 'notiflix';
+import SimpleLightbox from 'simplelightbox';
 import { searchPhoto } from './api';
-import axios from 'axios';
-
-axios.defaults.headers.common['x-pixabay-key'] =
-  '754704-15f293fdc79a851fbfbf7bf56';
 
 const searchForm = document.querySelector('.search-form');
 const gallery = document.querySelector('.gallery');
@@ -39,7 +36,7 @@ const onSearch = async e => {
       const totalHits = data.totalHits;
       Notiflix.Notify.success(`Hooray! We found ${totalHits} images.`);
 
-      if (data.totalHits <= page * perPage) {
+      if (data.totalHits <= page * per_page) {
         btnLoadMore.style.display = 'none';
         Notiflix.Notify.warning(
           "We're sorry, but you've reached the end of search results."
